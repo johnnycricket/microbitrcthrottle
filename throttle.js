@@ -1,27 +1,60 @@
 let speed = 0;
-let regulator = [-1023, -767, -511, -255, 0, 255, 511, 767, 1023];
+let regulator = [-1023, -767, -511, -380, 0, 380, 511, 767, 1023];
 let regulatorStep = 5; //5 is off.
 radio.setGroup(1);
 basic.forever(function () {
     input.onButtonPressed(Button.A, function () {
         speed = throttle('down');
         radio.sendValue('down', speed);
-        printSpeed(speed);
+        printSpeed('down', speed, regulatorStep);
     })
     input.onButtonPressed(Button.B, function () {
         speed = throttle('up');
         radio.sendValue('up', speed);
-        printSpeed(speed);
+        printSpeed('up', speed, regulatorStep);
     })
     input.onButtonPressed(Button.AB, function () {
         speed = throttle('stop');
         radio.sendValue('stop', speed);
-        printSpeed(speed);
+        printSpeed('stop', speed, regulatorStep);
     })
 });
 
-function printSpeed(n: number) {
-    basic.showNumber(n);
+function printSpeed(dir: string, n: number, r: number) {
+    function upArrow() {
+        basic.showArrow(0);
+    }
+    function downArrow() {
+        basic.showArrow(4);
+    }
+    function stopDisplay() {
+        basic.showLeds(`
+            # . . . #
+            . # . # .
+            . . # . .
+            . # . # .
+            # . . . #
+            `)
+    }
+
+    switch (dir) {
+        case 'up':
+            basic.clearScreen()
+            upArrow()
+            break;
+        case 'down':
+            basic.clearScreen()
+            downArrow()
+            break;
+        case 'stop':
+            basic.clearScreen()
+            stopDisplay()
+            break;
+        default: ;
+            basic.clearScreen()
+            stopDisplay()
+            break;
+    }
 }
 
 function moveRegulator(b: boolean) {
@@ -60,4 +93,3 @@ function throttle(dir: string) {
     }
     return speed = limiter(speed);
 }
-
